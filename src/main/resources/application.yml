@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: sponsor
+  datasource:
+    url: "jdbc:mysql://localhost:3306/contract"
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: root
+    password: thuong
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
