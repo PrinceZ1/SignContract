@@ -1,7 +1,8 @@
-package com.princez1.SignContract.service;
+package com.princez1.SignContract.service.impl;
 
 import com.princez1.SignContract.entity.FundingItem;
 import com.princez1.SignContract.repository.FundingItemRepository;
+import com.princez1.SignContract.service.FundingItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

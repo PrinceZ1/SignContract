@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Hợp đồng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .funding-item {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .funding-item.selected {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+        .item-value {
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Quản lý Hợp đồng</h2>
+        
+        <!-- Form tạo hợp đồng -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Tạo hợp đồng mới</h4>
+            </div>
+            <div class="card-body">
+                <form id="contractForm">
+                    <!-- Thông tin nhà tài trợ -->
+                    <div class="mb-3">
+                        <h5>Thông tin nhà tài trợ</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Tên công ty</label>
+                                <input type="text" class="form-control" id="sponsorName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Người liên hệ</label>
+                                <input type="text" class="form-control" id="sponsorContact" required>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="sponsorPhone" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="sponsorEmail" required>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <label class="form-label">Địa chỉ</label>
+                                <input type="text" class="form-control" id="sponsorAddress" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin hợp đồng -->
+                    <div class="mb-3">
+                        <h5>Thông tin hợp đồng</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Loại hợp đồng</label>
+                                <select class="form-select" id="contractType" required>
+                                    <option value="SPONSORSHIP">Tài trợ</option>
+                                    <option value="ADVERTISING">Quảng cáo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Ngày bắt đầu</label>
+                                <input type="datetime-local" class="form-control" id="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ngày kết thúc</label>
+                                <input type="datetime-local" class="form-control" id="endDate" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hạng mục tài trợ -->
+                    <div class="mb-3">
+                        <h5>Hạng mục tài trợ</h5>
+                        <div id="fundingItems">
+                            <div class="funding-item" data-id="1" onclick="toggleFundingItem(1)">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <strong>Tài trợ sự kiện</strong>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" class="form-control item-value" placeholder="Giá trị" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="funding-item" data-id="2" onclick="toggleFundingItem(2)">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <strong>Tài trợ quảng cáo</strong>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" class="form-control item-value" placeholder="Giá trị" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <strong>Tổng giá trị: </strong>
+                            <span id="totalValue">0</span> VNĐ
+                        </div>
+                    </div>
+
+                    <!-- Điều khoản -->
+                    <div class="mb-3">
+                        <label class="form-label">Điều khoản hợp đồng</label>
+                        <textarea class="form-control" id="terms" rows="4" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Tạo hợp đồng</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFundingItem(itemId) {
+            const item = document.querySelector(`.funding-item[data-id="${itemId}"]`);
+            item.classList.toggle('selected');
+            const valueInput = item.querySelector('.item-value');
+            if (item.classList.contains('selected')) {
+                valueInput.disabled = false;
+                valueInput.value = '';
+            } else {
+                valueInput.disabled = true;
+                valueInput.value = '';
+            }
+            updateTotalValue();
+        }
+
+        function updateTotalValue() {
+            let total = 0;
+            document.querySelectorAll('.funding-item.selected .item-value').forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                total += value;
+            });
+            document.getElementById('totalValue').textContent = total.toLocaleString('vi-VN');
+        }
+
+        async function handleContractSubmit(event) {
+            event.preventDefault();
+
+            const fundingItems = [];
+            document.querySelectorAll('.funding-item.selected').forEach(item => {
+                const value = parseFloat(item.querySelector('.item-value').value);
+                if (value > 0) {
+                    fundingItems.push({
+                        fundingItem: {
+                            name: item.querySelector('strong').textContent
+                        },
+                        value: value
+                    });
+                }
+            });
+
+            if (fundingItems.length === 0) {
+                alert('Vui lòng chọn ít nhất một hạng mục tài trợ và nhập giá trị');
+                return;
+            }
+
+            const contractData = {
+                sponsor: {
+                    name: document.getElementById('sponsorName').value,
+                    contact: document.getElementById('sponsorContact').value,
+                    phone: document.getElementById('sponsorPhone').value,
+                    email: document.getElementById('sponsorEmail').value,
+                    address: document.getElementById('sponsorAddress').value
+                },
+                type: document.getElementById('contractType').value,
+                fundingItems: fundingItems,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                terms: document.getElementById('terms').value
+            };
+
+            try {
+                const response = await fetch('/api/contracts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contractData)
+                });
+
+                if (response.ok) {
+                    alert('Tạo hợp đồng thành công!');
+                    document.getElementById('contractForm').reset();
+                    document.querySelectorAll('.funding-item').forEach(item => {
+                        item.classList.remove('selected');
+                        item.querySelector('.item-value').disabled = true;
+                        item.querySelector('.item-value').value = '';
+                    });
+                    updateTotalValue();
+                } else {
+                    const error = await response.json();
+                    alert('Lỗi: ' + (error.message || 'Không thể tạo hợp đồng'));
+                }
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        document.getElementById('contractForm').addEventListener('submit', handleContractSubmit);
+    </script>
+</body>
+</html> 

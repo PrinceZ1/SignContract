@@ -48,10 +48,9 @@ public class Contract {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", columnDefinition = "VARCHAR(20)")
     private ContractStatus status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
 }
