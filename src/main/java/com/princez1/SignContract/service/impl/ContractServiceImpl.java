@@ -53,11 +53,21 @@ public class ContractServiceImpl implements ContractService {
 
         List<ContractFundingItemEntity> fundingItems = contract.getFundingItems().stream()
             .map(item -> {
+                if (item.getValue() == null) {
+                    throw new RuntimeException("Giá trị hạng mục tài trợ không được để trống");
+                }
+                
                 ContractFundingItemEntity fundingItem = new ContractFundingItemEntity();
-                FundingItemEntity fi = new FundingItemEntity();
-                fi.setName(item.getFundingItem().getName());
-                FundingItemEntity savedFundingItem = fundingItemRepository.save(fi);
-                fundingItem.setFundingItem(savedFundingItem);
+                FundingItemEntity existingFundingItem = fundingItemRepository.findAll().stream()
+                    .filter(fi -> fi.getName().equals(item.getFundingItem().getName()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        FundingItemEntity newFi = new FundingItemEntity();
+                        newFi.setName(item.getFundingItem().getName());
+                        return fundingItemRepository.save(newFi);
+                    });
+                
+                fundingItem.setFundingItem(existingFundingItem);
                 fundingItem.setValue(item.getValue());
                 fundingItem.setContract(contractEntity);
                 return fundingItem;

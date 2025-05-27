@@ -26,6 +26,7 @@ public class Contract {
     public void calculateTotalAmount() {
         this.totalAmount = fundingItems.stream()
             .map(ContractFundingItem::getValue)
+            .filter(value -> value != null)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 } 
