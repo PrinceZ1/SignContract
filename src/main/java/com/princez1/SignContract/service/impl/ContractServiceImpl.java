@@ -1,14 +1,14 @@
 package com.princez1.SignContract.service.impl;
 
-import com.princez1.SignContract.entity.Contract;
-import com.princez1.SignContract.entity.ContractFundingItem;
-import com.princez1.SignContract.entity.FundingItem;
-import com.princez1.SignContract.entity.Sponsor;
+import com.princez1.SignContract.entity.ContractEntity;
+import com.princez1.SignContract.entity.ContractFundingItemEntity;
+import com.princez1.SignContract.entity.FundingItemEntity;
+import com.princez1.SignContract.entity.SponsorEntity;
 import com.princez1.SignContract.enums.ContractStatus;
-import com.princez1.SignContract.model.ContractModel;
-import com.princez1.SignContract.model.ContractFundingItemModel;
-import com.princez1.SignContract.model.FundingItemModel;
-import com.princez1.SignContract.model.SponsorModel;
+import com.princez1.SignContract.model.Contract;
+import com.princez1.SignContract.model.ContractFundingItem;
+import com.princez1.SignContract.model.FundingItem;
+import com.princez1.SignContract.model.Sponsor;
 import com.princez1.SignContract.repository.ContractRepository;
 import com.princez1.SignContract.repository.SponsorRepository;
 import com.princez1.SignContract.repository.FundingItemRepository;
@@ -35,38 +35,28 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public ContractModel createContract(ContractModel contractModel) {
-        contractModel.calculateTotalAmount();
+    public Contract createContract(Contract contract) {
+        contract.calculateTotalAmount();
 
-        Contract contractEntity = new Contract();
-        contractEntity.setType(contractModel.getType());
-        contractEntity.setStartDate(contractModel.getStartDate());
-        contractEntity.setEndDate(contractModel.getEndDate());
-        contractEntity.setTerms(contractModel.getTerms());
-        contractEntity.setAmount(contractModel.getTotalAmount());
-        
+        ContractEntity contractEntity = new ContractEntity();
+        contractEntity.setType(contract.getType());
+        contractEntity.setStartDate(contract.getStartDate());
+        contractEntity.setEndDate(contract.getEndDate());
+        contractEntity.setTerms(contract.getTerms());
+        contractEntity.setAmount(contract.getTotalAmount());
         contractEntity.setStatus(ContractStatus.SIGNED);
         contractEntity.setCreatedAt(LocalDateTime.now());
-        
-        Sponsor sponsor = new Sponsor();
-        sponsor.setName(contractModel.getSponsor().getName());
-        sponsor.setContact(contractModel.getSponsor().getContact());
-        sponsor.setPhone(contractModel.getSponsor().getPhone());
-        sponsor.setEmail(contractModel.getSponsor().getEmail());
-        sponsor.setAddress(contractModel.getSponsor().getAddress());
-        sponsor.setActive(true);
-        
-        Sponsor savedSponsor = sponsorRepository.save(sponsor);
-        contractEntity.setSponsor(savedSponsor);
-        
-        List<ContractFundingItem> fundingItems = contractModel.getFundingItems().stream()
+
+        SponsorEntity sponsor = sponsorRepository.findById(contract.getSponsorId())
+            .orElseThrow(() -> new RuntimeException("Sponsor not found"));
+        contractEntity.setSponsor(sponsor);
+
+        List<ContractFundingItemEntity> fundingItems = contract.getFundingItems().stream()
             .map(item -> {
-                ContractFundingItem fundingItem = new ContractFundingItem();
-                
-                FundingItem fi = new FundingItem();
+                ContractFundingItemEntity fundingItem = new ContractFundingItemEntity();
+                FundingItemEntity fi = new FundingItemEntity();
                 fi.setName(item.getFundingItem().getName());
-                FundingItem savedFundingItem = fundingItemRepository.save(fi);
-                
+                FundingItemEntity savedFundingItem = fundingItemRepository.save(fi);
                 fundingItem.setFundingItem(savedFundingItem);
                 fundingItem.setValue(item.getValue());
                 fundingItem.setContract(contractEntity);
@@ -75,31 +65,30 @@ public class ContractServiceImpl implements ContractService {
             .collect(Collectors.toList());
         contractEntity.setContractFundingItems(fundingItems);
 
-        Contract savedContract = contractRepository.save(contractEntity);
-        
+        ContractEntity savedContract = contractRepository.save(contractEntity);
         return convertToModel(savedContract);
     }
 
     @Override
-    public List<ContractModel> getAllContracts() {
-        List<Contract> contracts = contractRepository.findAll();
+    public List<Contract> getAllContracts() {
+        List<ContractEntity> contracts = contractRepository.findAll();
         return contracts.stream()
             .map(this::convertToModel)
             .collect(Collectors.toList());
     }
 
     @Override
-    public ContractModel getContractById(Long id) {
-        Contract contract = contractRepository.findById(id)
+    public Contract getContractById(Long id) {
+        ContractEntity contract = contractRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Contract not found"));
         return convertToModel(contract);
     }
 
-    private ContractModel convertToModel(Contract contractEntity) {
-        ContractModel model = new ContractModel();
+    private Contract convertToModel(ContractEntity contractEntity) {
+        Contract model = new Contract();
         model.setId(contractEntity.getId());
         
-        SponsorModel sponsorModel = new SponsorModel();
+        Sponsor sponsorModel = new Sponsor();
         sponsorModel.setName(contractEntity.getSponsor().getName());
         sponsorModel.setContact(contractEntity.getSponsor().getContact());
         sponsorModel.setPhone(contractEntity.getSponsor().getPhone());
@@ -115,11 +104,11 @@ public class ContractServiceImpl implements ContractService {
         model.setStatus(contractEntity.getStatus());
         model.setCreatedAt(contractEntity.getCreatedAt());
 
-        List<ContractFundingItemModel> fundingItemModels = contractEntity.getContractFundingItems().stream()
+        List<ContractFundingItem> fundingItemModels = contractEntity.getContractFundingItems().stream()
             .map(item -> {
-                ContractFundingItemModel itemModel = new ContractFundingItemModel();
+                ContractFundingItem itemModel = new ContractFundingItem();
                 
-                FundingItemModel fundingItemModel = new FundingItemModel();
+                FundingItem fundingItemModel = new FundingItem();
                 fundingItemModel.setName(item.getFundingItem().getName());
                 itemModel.setFundingItem(fundingItemModel);
                 

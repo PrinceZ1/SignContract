@@ -1,6 +1,6 @@
 package com.princez1.SignContract.service.impl;
 
-import com.princez1.SignContract.entity.Sponsor;
+import com.princez1.SignContract.entity.SponsorEntity;
 import com.princez1.SignContract.repository.SponsorRepository;
 import com.princez1.SignContract.service.SponsorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +18,18 @@ public class SponsorServiceImpl implements SponsorService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     @Override
-    public List<Sponsor> getActiveSponsors() {
+    public List<SponsorEntity> getActiveSponsors() {
         return sponsorRepository.findByActiveTrue();
     }
 
     @Override
-    public Sponsor createSponsor(Sponsor sponsor) {
+    public SponsorEntity createSponsor(SponsorEntity sponsor) {
         validateSponsor(sponsor);
         sponsor.setActive(true);
         return sponsorRepository.save(sponsor);
     }
 
-    private void validateSponsor(Sponsor sponsor) {
+    private void validateSponsor(SponsorEntity sponsor) {
         if (!StringUtils.hasText(sponsor.getName())) {
             throw new IllegalArgumentException("Tên nhà tài trợ không được rỗng");
         }

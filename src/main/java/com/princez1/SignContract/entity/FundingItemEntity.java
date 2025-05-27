@@ -8,21 +8,15 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "sponsors")
-public class Sponsor {
+@Table(name = "funding_items")
+public class FundingItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
-    private String contact;
-    private String phone;
-    private String email;
-    private String address;
-    private boolean active;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "sponsor", cascade = CascadeType.ALL)
-    private List<Contract> contracts;
+    @OneToMany(mappedBy = "fundingItem")
+    private List<ContractFundingItemEntity> contractFundingItems;
 }
-

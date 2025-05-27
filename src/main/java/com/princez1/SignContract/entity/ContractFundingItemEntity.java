@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "contract_funding_items")
-public class ContractFundingItem {
+public class ContractFundingItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,11 +17,11 @@ public class ContractFundingItem {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "contract_id")
-    private Contract contract;
+    private ContractEntity contract;
 
     @ManyToOne
     @JoinColumn(name = "funding_item_id")
-    private FundingItem fundingItem;
+    private FundingItemEntity fundingItem;
 
     @Column(nullable = false)
     private BigDecimal value;

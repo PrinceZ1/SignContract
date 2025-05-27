@@ -8,13 +8,14 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Entity
 @Table(name = "contracts")
-public class Contract {
+public class ContractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,14 +23,14 @@ public class Contract {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "sponsor_id")
-    private Sponsor sponsor;
+    private SponsorEntity sponsor;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     private ContractType type;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContractFundingItem> contractFundingItems;
+    private List<ContractFundingItemEntity> contractFundingItems;
 
     @NotNull
     @Positive
@@ -37,11 +38,11 @@ public class Contract {
 
     @NotNull
     @Column(name = "start_date")
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @NotNull
     @Column(name = "end_date")
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @NotNull
     private String terms;

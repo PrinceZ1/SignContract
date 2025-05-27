@@ -5,25 +5,27 @@ import com.princez1.SignContract.enums.ContractType;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class ContractModel {
+public class Contract {
     private Long id;
-    private SponsorModel sponsor;
+    private Long sponsorId;
+    private Sponsor sponsor;
     private ContractType type;
-    private List<ContractFundingItemModel> fundingItems;
+    private List<ContractFundingItem> fundingItems;
     private BigDecimal totalAmount;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String terms;
     private ContractStatus status;
     private LocalDateTime createdAt;
 
     public void calculateTotalAmount() {
         this.totalAmount = fundingItems.stream()
-            .map(ContractFundingItemModel::getValue)
+            .map(ContractFundingItem::getValue)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 } 

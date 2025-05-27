@@ -1,6 +1,6 @@
 package com.princez1.SignContract.controller;
 
-import com.princez1.SignContract.model.ContractModel;
+import com.princez1.SignContract.model.Contract;
 import com.princez1.SignContract.service.ContractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,20 +16,20 @@ public class ContractController {
     private ContractService contractService;
 
     @PostMapping
-    public ResponseEntity<ContractModel> createContract(@RequestBody ContractModel contract) {
-        ContractModel createdContract = contractService.createContract(contract);
+    public ResponseEntity<Contract> createContract(@RequestBody Contract contract) {
+        Contract createdContract = contractService.createContract(contract);
         return ResponseEntity.ok(createdContract);
     }
 
     @GetMapping
-    public ResponseEntity<List<ContractModel>> getAllContracts() {
-        List<ContractModel> contracts = contractService.getAllContracts();
+    public ResponseEntity<List<Contract>> getAllContracts() {
+        List<Contract> contracts = contractService.getAllContracts();
         return ResponseEntity.ok(contracts);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ContractModel> getContractById(@PathVariable Long id) {
-        ContractModel contract = contractService.getContractById(id);
+    public ResponseEntity<Contract> getContractById(@PathVariable Long id) {
+        Contract contract = contractService.getContractById(id);
         return ResponseEntity.ok(contract);
     }
 } 
