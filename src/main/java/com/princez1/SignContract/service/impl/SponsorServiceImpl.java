@@ -18,6 +18,11 @@ public class SponsorServiceImpl implements SponsorService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     @Override
+    public List<SponsorEntity> getAllSponsors() {
+        return sponsorRepository.findAll();
+    }
+
+    @Override
     public List<SponsorEntity> getActiveSponsors() {
         return sponsorRepository.findByActiveTrue();
     }
@@ -26,6 +31,32 @@ public class SponsorServiceImpl implements SponsorService {
     public SponsorEntity createSponsor(SponsorEntity sponsor) {
         validateSponsor(sponsor);
         sponsor.setActive(true);
+        return sponsorRepository.save(sponsor);
+    }
+
+    @Override
+    public SponsorEntity getSponsorById(Long id) {
+        return sponsorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sponsor not found with id: " + id));
+    }
+
+    @Override
+    public SponsorEntity updateSponsor(Long id, SponsorEntity sponsor) {
+        SponsorEntity existingSponsor = getSponsorById(id);
+        
+        existingSponsor.setName(sponsor.getName());
+        existingSponsor.setEmail(sponsor.getEmail());
+        existingSponsor.setPhone(sponsor.getPhone());
+        existingSponsor.setAddress(sponsor.getAddress());
+        existingSponsor.setActive(sponsor.isActive());
+        
+        return sponsorRepository.save(existingSponsor);
+    }
+
+    @Override
+    public SponsorEntity changeStatus(Long id, boolean active) {
+        SponsorEntity sponsor = getSponsorById(id);
+        sponsor.setActive(active);
         return sponsorRepository.save(sponsor);
     }
 

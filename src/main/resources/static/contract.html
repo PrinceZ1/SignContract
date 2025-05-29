@@ -18,6 +18,24 @@
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
+        .nav-top {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .nav-top a {
+            text-decoration: none;
+            color: #007bff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 0.9rem;
+        }
+        .nav-top a:hover {
+            background-color: #e9ecef;
+        }
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -91,6 +109,10 @@
 </head>
 <body>
     <div class="container">
+        <nav class="nav-top">
+            <a href="/dashboard.html">Dashboard</a>
+        </nav>
+        
         <ul class="nav nav-tabs mb-4" id="contractTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="sign-tab" data-bs-toggle="tab" data-bs-target="#signContractTab" type="button" role="tab">Ký hợp đồng</button>
