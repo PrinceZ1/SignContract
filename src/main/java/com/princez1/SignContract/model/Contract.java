@@ -13,6 +13,7 @@ import java.util.List;
 public class Contract {
     private Long id;
     private Sponsor sponsor;
+    private User signedBy;
     private ContractType type;
     private List<ContractFundingItem> fundingItems;
     private BigDecimal totalAmount;

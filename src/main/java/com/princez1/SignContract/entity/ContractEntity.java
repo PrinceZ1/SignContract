@@ -26,6 +26,11 @@ public class ContractEntity {
     private SponsorEntity sponsor;
 
     @NotNull
+    @ManyToOne
+    @JoinColumn(name = "signed_by")
+    private UserEntity signedBy;
+
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ContractType type;
 

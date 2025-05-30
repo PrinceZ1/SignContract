@@ -4,14 +4,17 @@ import com.princez1.SignContract.entity.ContractEntity;
 import com.princez1.SignContract.entity.ContractFundingItemEntity;
 import com.princez1.SignContract.entity.FundingItemEntity;
 import com.princez1.SignContract.entity.SponsorEntity;
+import com.princez1.SignContract.entity.UserEntity;
 import com.princez1.SignContract.enums.ContractStatus;
 import com.princez1.SignContract.model.Contract;
 import com.princez1.SignContract.model.ContractFundingItem;
 import com.princez1.SignContract.model.FundingItem;
 import com.princez1.SignContract.model.Sponsor;
+import com.princez1.SignContract.model.User;
 import com.princez1.SignContract.repository.ContractRepository;
 import com.princez1.SignContract.repository.SponsorRepository;
 import com.princez1.SignContract.repository.FundingItemRepository;
+import com.princez1.SignContract.repository.UserRepository;
 import com.princez1.SignContract.service.ContractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,9 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     private SponsorRepository sponsorRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private FundingItemRepository fundingItemRepository;
@@ -56,6 +62,10 @@ public class ContractServiceImpl implements ContractService {
         sponsorEntity.setAddress(contract.getSponsor().getAddress());
         sponsorEntity.setActive(true);
         contractEntity.setSponsor(sponsorEntity);
+
+        UserEntity signer = userRepository.findById(contract.getSignedBy().getId())
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy người ký"));
+        contractEntity.setSignedBy(signer);
 
         List<ContractFundingItemEntity> fundingItems = new ArrayList<>();
         
@@ -108,6 +118,14 @@ public class ContractServiceImpl implements ContractService {
         sponsorModel.setEmail(contractEntity.getSponsor().getEmail());
         sponsorModel.setAddress(contractEntity.getSponsor().getAddress());
         model.setSponsor(sponsorModel);
+
+        User signerModel = new User();
+        signerModel.setId(contractEntity.getSignedBy().getId());
+        signerModel.setName(contractEntity.getSignedBy().getName());
+        signerModel.setEmail(contractEntity.getSignedBy().getEmail());
+        signerModel.setPhoneNumber(contractEntity.getSignedBy().getPhoneNumber());
+        signerModel.setPosition(contractEntity.getSignedBy().getPosition());
+        model.setSignedBy(signerModel);
 
         model.setType(contractEntity.getType());
         model.setTotalAmount(contractEntity.getAmount());

@@ -208,6 +208,12 @@
                         <textarea id="terms" class="form-control" rows="4" required></textarea>
                     </div>
 
+                    <!-- Signer Display -->
+                    <div class="mb-3">
+                        <label class="form-label">Người ký hợp đồng:</label>
+                        <span id="signerNameDisplay"></span>
+                    </div>
+
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> Ký hợp đồng
@@ -500,6 +506,12 @@
             }
 
             const selectedSponsor = JSON.parse(document.getElementById('sponsorSelect').value);
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                alert('Bạn cần đăng nhập trước khi ký hợp đồng!');
+                window.location.href = '/login.html';
+                return;
+            }
             const contractData = {
                 type: document.getElementById('contractType').value,
                 startDate: document.getElementById('startDate').value,
@@ -513,7 +525,8 @@
                     email: selectedSponsor.email,
                     address: selectedSponsor.address
                 },
-                fundingItems: selectedItems
+                fundingItems: selectedItems,
+                signedBy: { id: currentUser.id }
             };
 
             try {
@@ -600,7 +613,11 @@
                                 <strong>Tổng giá trị:</strong> ${Number(contract.totalAmount || 0).toLocaleString('vi-VN')} VND<br>
                                 <strong>Ngày bắt đầu:</strong> ${contract.startDate ? new Date(contract.startDate).toLocaleDateString('vi-VN') : ''}<br>
                                 <strong>Ngày kết thúc:</strong> ${contract.endDate ? new Date(contract.endDate).toLocaleDateString('vi-VN') : ''}<br>
-                                <strong>Trạng thái:</strong> <span class="badge bg-success">${contract.status || ''}</span>
+                                <strong>Trạng thái:</strong> <span class="badge bg-success">${contract.status || ''}</span><br>
+                                <strong>Người ký hợp đồng:</strong> ${contract.signedBy ? contract.signedBy.name : ''} <br>
+                                <strong>Email:</strong> ${contract.signedBy ? contract.signedBy.email : ''} <br>
+                                <strong>Điện thoại:</strong> ${contract.signedBy ? contract.signedBy.phoneNumber : ''} <br>
+                                <strong>Chức vụ:</strong> ${contract.signedBy ? contract.signedBy.position : ''} <br>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -628,6 +645,10 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                document.getElementById('signerNameDisplay').textContent = currentUser.name;
+            }
             loadSponsors();
             loadFundingItems();
 
