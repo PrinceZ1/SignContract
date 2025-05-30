@@ -24,9 +24,14 @@ public class Contract {
     private LocalDateTime createdAt;
 
     public void calculateTotalAmount() {
-        this.totalAmount = fundingItems.stream()
-            .map(ContractFundingItem::getValue)
-            .filter(value -> value != null)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.totalAmount = BigDecimal.ZERO;
+        
+        if (this.fundingItems != null) {
+            for (ContractFundingItem item : this.fundingItems) {
+                if (item.getValue() != null) {
+                    this.totalAmount = this.totalAmount.add(item.getValue());
+                }
+            }
+        }
     }
 } 

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,31 +49,38 @@ public class ContractServiceImpl implements ContractService {
         contractEntity.setCreatedAt(LocalDateTime.now());
 
         SponsorEntity sponsor = sponsorRepository.findById(contract.getSponsorId())
-            .orElseThrow(() -> new RuntimeException("Sponsor not found"));
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà tài trợ"));
         contractEntity.setSponsor(sponsor);
 
-        List<ContractFundingItemEntity> fundingItems = contract.getFundingItems().stream()
-            .map(item -> {
-                if (item.getValue() == null) {
-                    throw new RuntimeException("Giá trị hạng mục tài trợ không được để trống");
+        List<ContractFundingItemEntity> fundingItems = new ArrayList<>();
+        
+        for (ContractFundingItem item : contract.getFundingItems()) {
+            if (item.getValue() == null) {
+                throw new RuntimeException("Giá trị hạng mục tài trợ không được để trống");
+            }
+            
+            FundingItemEntity fundingItemEntity = null;
+            String itemName = item.getFundingItem().getName();
+            
+            for (FundingItemEntity fi : fundingItemRepository.findAll()) {
+                if (fi.getName().equals(itemName)) {
+                    fundingItemEntity = fi;
+                    break;
                 }
-                
-                ContractFundingItemEntity fundingItem = new ContractFundingItemEntity();
-                FundingItemEntity existingFundingItem = fundingItemRepository.findAll().stream()
-                    .filter(fi -> fi.getName().equals(item.getFundingItem().getName()))
-                    .findFirst()
-                    .orElseGet(() -> {
-                        FundingItemEntity newFi = new FundingItemEntity();
-                        newFi.setName(item.getFundingItem().getName());
-                        return fundingItemRepository.save(newFi);
-                    });
-                
-                fundingItem.setFundingItem(existingFundingItem);
-                fundingItem.setValue(item.getValue());
-                fundingItem.setContract(contractEntity);
-                return fundingItem;
-            })
-            .collect(Collectors.toList());
+            }
+            
+            if (fundingItemEntity == null) {
+                throw new RuntimeException("Không tìm thấy hạng mục tài trợ: " + itemName);
+            }
+            
+            ContractFundingItemEntity contractFundingItem = new ContractFundingItemEntity();
+            contractFundingItem.setFundingItem(fundingItemEntity);
+            contractFundingItem.setValue(item.getValue());
+            contractFundingItem.setContract(contractEntity);
+            
+            fundingItems.add(contractFundingItem);
+        }
+        
         contractEntity.setContractFundingItems(fundingItems);
 
         ContractEntity savedContract = contractRepository.save(contractEntity);

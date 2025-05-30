@@ -585,6 +585,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadSponsors();
             loadFundingItems();
+
+            // Add event listener for tab changes
+            const listTab = document.querySelector('#list-tab');
+            listTab.addEventListener('shown.bs.tab', () => {
+                loadContracts();
+            });
         });
     </script>
 </body>

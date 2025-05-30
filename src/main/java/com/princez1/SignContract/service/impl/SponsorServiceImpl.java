@@ -1,6 +1,7 @@
 package com.princez1.SignContract.service.impl;
 
 import com.princez1.SignContract.entity.SponsorEntity;
+import com.princez1.SignContract.model.Sponsor;
 import com.princez1.SignContract.repository.SponsorRepository;
 import com.princez1.SignContract.service.SponsorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class SponsorServiceImpl implements SponsorService {
@@ -18,31 +20,37 @@ public class SponsorServiceImpl implements SponsorService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     @Override
-    public List<SponsorEntity> getAllSponsors() {
-        return sponsorRepository.findAll();
+    public List<Sponsor> getAllSponsors() {
+        return sponsorRepository.findAll().stream()
+            .map(this::convertToModel)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public List<SponsorEntity> getActiveSponsors() {
-        return sponsorRepository.findByActiveTrue();
+    public List<Sponsor> getActiveSponsors() {
+        return sponsorRepository.findByActiveTrue().stream()
+            .map(this::convertToModel)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public SponsorEntity createSponsor(SponsorEntity sponsor) {
+    public Sponsor createSponsor(Sponsor sponsor) {
         validateSponsor(sponsor);
-        sponsor.setActive(true);
-        return sponsorRepository.save(sponsor);
+        SponsorEntity entity = convertToEntity(sponsor);
+        entity.setActive(true);
+        return convertToModel(sponsorRepository.save(entity));
     }
 
     @Override
-    public SponsorEntity getSponsorById(Long id) {
-        return sponsorRepository.findById(id)
+    public Sponsor getSponsorById(Long id) {
+        return convertToModel(sponsorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sponsor not found with id: " + id)));
+    }
+
+    @Override
+    public Sponsor updateSponsor(Long id, Sponsor sponsor) {
+        SponsorEntity existingSponsor = sponsorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sponsor not found with id: " + id));
-    }
-
-    @Override
-    public SponsorEntity updateSponsor(Long id, SponsorEntity sponsor) {
-        SponsorEntity existingSponsor = getSponsorById(id);
         
         existingSponsor.setName(sponsor.getName());
         existingSponsor.setEmail(sponsor.getEmail());
@@ -50,17 +58,18 @@ public class SponsorServiceImpl implements SponsorService {
         existingSponsor.setAddress(sponsor.getAddress());
         existingSponsor.setActive(sponsor.isActive());
         
-        return sponsorRepository.save(existingSponsor);
+        return convertToModel(sponsorRepository.save(existingSponsor));
     }
 
     @Override
-    public SponsorEntity changeStatus(Long id, boolean active) {
-        SponsorEntity sponsor = getSponsorById(id);
+    public Sponsor changeStatus(Long id, boolean active) {
+        SponsorEntity sponsor = sponsorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sponsor not found with id: " + id));
         sponsor.setActive(active);
-        return sponsorRepository.save(sponsor);
+        return convertToModel(sponsorRepository.save(sponsor));
     }
 
-    private void validateSponsor(SponsorEntity sponsor) {
+    private void validateSponsor(Sponsor sponsor) {
         if (!StringUtils.hasText(sponsor.getName())) {
             throw new IllegalArgumentException("Tên nhà tài trợ không được rỗng");
         }
@@ -79,5 +88,29 @@ public class SponsorServiceImpl implements SponsorService {
         if (!StringUtils.hasText(sponsor.getAddress())) {
             throw new IllegalArgumentException("Địa chỉ không được rỗng");
         }
+    }
+
+    private Sponsor convertToModel(SponsorEntity entity) {
+        Sponsor model = new Sponsor();
+        model.setId(entity.getId());
+        model.setName(entity.getName());
+        model.setContact(entity.getContact());
+        model.setPhone(entity.getPhone());
+        model.setEmail(entity.getEmail());
+        model.setAddress(entity.getAddress());
+        model.setActive(entity.isActive());
+        return model;
+    }
+
+    private SponsorEntity convertToEntity(Sponsor model) {
+        SponsorEntity entity = new SponsorEntity();
+        entity.setId(model.getId());
+        entity.setName(model.getName());
+        entity.setContact(model.getContact());
+        entity.setPhone(model.getPhone());
+        entity.setEmail(model.getEmail());
+        entity.setAddress(model.getAddress());
+        entity.setActive(model.isActive());
+        return entity;
     }
 } 
