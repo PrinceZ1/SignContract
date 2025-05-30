@@ -48,9 +48,14 @@ public class ContractServiceImpl implements ContractService {
         contractEntity.setStatus(ContractStatus.SIGNED);
         contractEntity.setCreatedAt(LocalDateTime.now());
 
-        SponsorEntity sponsor = sponsorRepository.findById(contract.getSponsorId())
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà tài trợ"));
-        contractEntity.setSponsor(sponsor);
+        SponsorEntity sponsorEntity = new SponsorEntity();
+        sponsorEntity.setName(contract.getSponsor().getName());
+        sponsorEntity.setContact(contract.getSponsor().getContact());
+        sponsorEntity.setPhone(contract.getSponsor().getPhone());
+        sponsorEntity.setEmail(contract.getSponsor().getEmail());
+        sponsorEntity.setAddress(contract.getSponsor().getAddress());
+        sponsorEntity.setActive(true);
+        contractEntity.setSponsor(sponsorEntity);
 
         List<ContractFundingItemEntity> fundingItems = new ArrayList<>();
         

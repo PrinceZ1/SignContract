@@ -12,7 +12,6 @@ import java.util.List;
 @Data
 public class Contract {
     private Long id;
-    private Long sponsorId;
     private Sponsor sponsor;
     private ContractType type;
     private List<ContractFundingItem> fundingItems;

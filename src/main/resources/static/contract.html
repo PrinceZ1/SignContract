@@ -130,11 +130,11 @@
                 <form id="contractForm">
                     <!-- Sponsor Selection -->
                     <div class="form-group">
-                        <label for="sponsorId" class="form-label">
+                        <label for="sponsorSelect" class="form-label">
                             <i class="bi bi-building"></i> Nhà tài trợ:
                         </label>
                         <div class="d-flex gap-2">
-                            <select id="sponsorId" class="form-select" required>
+                            <select id="sponsorSelect" class="form-select" required>
                                 <option value="">Chọn nhà tài trợ</option>
                             </select>
                             <button type="button" class="btn btn-primary" id="addNewSponsorBtn">
@@ -142,6 +142,13 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Hidden sponsor info fields -->
+                    <input type="hidden" id="sponsorName">
+                    <input type="hidden" id="sponsorContact">
+                    <input type="hidden" id="sponsorPhone">
+                    <input type="hidden" id="sponsorEmail">
+                    <input type="hidden" id="sponsorAddress">
 
                     <!-- Contract Type -->
                     <div class="form-group">
@@ -243,24 +250,24 @@
                 <div class="modal-body">
                     <form id="newSponsorForm">
                         <div class="form-group">
-                            <label for="sponsorName" class="form-label">Tên nhà tài trợ:</label>
-                            <input type="text" id="sponsorName" class="form-control" required>
+                            <label for="newSponsorName" class="form-label">Tên nhà tài trợ:</label>
+                            <input type="text" id="newSponsorName" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="sponsorContact" class="form-label">Người liên hệ:</label>
-                            <input type="text" id="sponsorContact" class="form-control" required>
+                            <label for="newSponsorContact" class="form-label">Người liên hệ:</label>
+                            <input type="text" id="newSponsorContact" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="sponsorPhone" class="form-label">Số điện thoại:</label>
-                            <input type="tel" id="sponsorPhone" class="form-control" required>
+                            <label for="newSponsorPhone" class="form-label">Số điện thoại:</label>
+                            <input type="tel" id="newSponsorPhone" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="sponsorEmail" class="form-label">Email:</label>
-                            <input type="email" id="sponsorEmail" class="form-control" required>
+                            <label for="newSponsorEmail" class="form-label">Email:</label>
+                            <input type="email" id="newSponsorEmail" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="sponsorAddress" class="form-label">Địa chỉ:</label>
-                            <textarea id="sponsorAddress" class="form-control" required></textarea>
+                            <label for="newSponsorAddress" class="form-label">Địa chỉ:</label>
+                            <textarea id="newSponsorAddress" class="form-control" required></textarea>
                         </div>
                     </form>
                 </div>
@@ -310,11 +317,18 @@
             try {
                 const response = await fetch('/api/sponsors/active');
                 const sponsors = await response.json();
-                const select = document.getElementById('sponsorId');
+                const select = document.getElementById('sponsorSelect');
                 select.innerHTML = '<option value="">Chọn nhà tài trợ</option>';
                 sponsors.forEach(sponsor => {
                     const option = document.createElement('option');
-                    option.value = sponsor.id;
+                    option.value = JSON.stringify({
+                        id: sponsor.id,
+                        name: sponsor.name,
+                        contact: sponsor.contact,
+                        phone: sponsor.phone,
+                        email: sponsor.email,
+                        address: sponsor.address
+                    });
                     option.textContent = sponsor.name;
                     select.appendChild(option);
                 });
@@ -391,22 +405,43 @@
             }
         });
 
+        // Handle sponsor selection
+        document.getElementById('sponsorSelect').addEventListener('change', function() {
+            if (this.value) {
+                const sponsor = JSON.parse(this.value);
+                document.getElementById('sponsorName').value = sponsor.name;
+                document.getElementById('sponsorContact').value = sponsor.contact;
+                document.getElementById('sponsorPhone').value = sponsor.phone;
+                document.getElementById('sponsorEmail').value = sponsor.email;
+                document.getElementById('sponsorAddress').value = sponsor.address;
+            } else {
+                document.getElementById('sponsorName').value = '';
+                document.getElementById('sponsorContact').value = '';
+                document.getElementById('sponsorPhone').value = '';
+                document.getElementById('sponsorEmail').value = '';
+                document.getElementById('sponsorAddress').value = '';
+            }
+        });
+
         // Handle new sponsor modal
         const sponsorModal = new bootstrap.Modal(document.getElementById('newSponsorModal'));
         const addNewSponsorBtn = document.getElementById('addNewSponsorBtn');
         const closeSponsorModalBtn = document.getElementById('closeSponsorModalBtn');
 
-        addNewSponsorBtn.onclick = () => sponsorModal.show();
+        addNewSponsorBtn.onclick = () => {
+            document.getElementById('newSponsorForm').reset();
+            sponsorModal.show();
+        };
         closeSponsorModalBtn.onclick = () => sponsorModal.hide();
 
         document.getElementById('newSponsorForm').onsubmit = async (e) => {
             e.preventDefault();
             const sponsorData = {
-                name: document.getElementById('sponsorName').value,
-                contact: document.getElementById('sponsorContact').value,
-                phone: document.getElementById('sponsorPhone').value,
-                email: document.getElementById('sponsorEmail').value,
-                address: document.getElementById('sponsorAddress').value,
+                name: document.getElementById('newSponsorName').value,
+                contact: document.getElementById('newSponsorContact').value,
+                phone: document.getElementById('newSponsorPhone').value,
+                email: document.getElementById('newSponsorEmail').value,
+                address: document.getElementById('newSponsorAddress').value,
                 active: true
             };
 
@@ -421,12 +456,19 @@
 
                 if (response.ok) {
                     const newSponsor = await response.json();
-                    const select = document.getElementById('sponsorId');
+                    const select = document.getElementById('sponsorSelect');
                     const option = document.createElement('option');
-                    option.value = newSponsor.id;
+                    option.value = JSON.stringify({
+                        id: newSponsor.id,
+                        name: newSponsor.name,
+                        contact: newSponsor.contact,
+                        phone: newSponsor.phone,
+                        email: newSponsor.email,
+                        address: newSponsor.address
+                    });
                     option.textContent = newSponsor.name;
                     select.appendChild(option);
-                    select.value = newSponsor.id;
+                    select.value = option.value;
                     sponsorModal.hide();
                     document.getElementById('newSponsorForm').reset();
                     showMessage('Thêm nhà tài trợ thành công', 'success');
@@ -441,7 +483,6 @@
         // Handle contract form submission
         document.getElementById('contractForm').onsubmit = async (e) => {
             e.preventDefault();
-
             const selectedItems = Array.from(document.querySelectorAll('.funding-item-checkbox:checked'))
                 .map(checkbox => {
                     const valueInput = document.querySelector(`.funding-item-value[data-item-id="${checkbox.value}"]`);
@@ -458,16 +499,21 @@
                 return;
             }
 
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-
+            const selectedSponsor = JSON.parse(document.getElementById('sponsorSelect').value);
             const contractData = {
-                sponsorId: parseInt(document.getElementById('sponsorId').value),
                 type: document.getElementById('contractType').value,
-                fundingItems: selectedItems,
-                startDate: startDate ? startDate + 'T00:00:00' : '',
-                endDate: endDate ? endDate + 'T00:00:00' : '',
-                terms: document.getElementById('terms').value
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                terms: document.getElementById('terms').value,
+                sponsor: {
+                    id: selectedSponsor.id,
+                    name: selectedSponsor.name,
+                    contact: selectedSponsor.contact,
+                    phone: selectedSponsor.phone,
+                    email: selectedSponsor.email,
+                    address: selectedSponsor.address
+                },
+                fundingItems: selectedItems
             };
 
             try {
@@ -480,7 +526,7 @@
                 });
 
                 if (response.ok) {
-                    showMessage('Ký hợp đồng thành công', 'success');
+                    showMessage('Tạo hợp đồng thành công', 'success');
                     document.getElementById('contractForm').reset();
                     document.querySelectorAll('.funding-item-checkbox').forEach(checkbox => {
                         checkbox.checked = false;
@@ -492,10 +538,10 @@
                     calculateTotalAmount();
                     switchToListTab();
                 } else {
-                    showMessage('Lỗi khi ký hợp đồng', 'error');
+                    showMessage('Lỗi khi tạo hợp đồng', 'error');
                 }
             } catch (error) {
-                showMessage('Lỗi khi ký hợp đồng', 'error');
+                showMessage('Lỗi khi tạo hợp đồng', 'error');
             }
         };
 
