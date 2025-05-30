@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class FundingItem {
+    private Long id;
     private String name;
 } 

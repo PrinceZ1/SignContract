@@ -447,8 +447,7 @@
                     const valueInput = document.querySelector(`.funding-item-value[data-item-id="${checkbox.value}"]`);
                     return {
                         fundingItem: {
-                            id: parseInt(checkbox.value),
-                            name: checkbox.nextElementSibling.textContent.trim()
+                            id: parseInt(checkbox.value)
                         },
                         value: parseFloat(valueInput.value)
                     };

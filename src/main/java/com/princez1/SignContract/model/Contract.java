@@ -24,12 +24,12 @@ public class Contract {
     private LocalDateTime createdAt;
 
     public void calculateTotalAmount() {
-        this.totalAmount = BigDecimal.ZERO;
+        totalAmount = BigDecimal.ZERO;
         
-        if (this.fundingItems != null) {
-            for (ContractFundingItem item : this.fundingItems) {
+        if (fundingItems != null) {
+            for (ContractFundingItem item : fundingItems) {
                 if (item.getValue() != null) {
-                    this.totalAmount = this.totalAmount.add(item.getValue());
+                    totalAmount = totalAmount.add(item.getValue());
                 }
             }
         }

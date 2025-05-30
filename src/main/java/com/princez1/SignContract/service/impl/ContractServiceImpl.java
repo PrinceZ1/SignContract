@@ -59,19 +59,9 @@ public class ContractServiceImpl implements ContractService {
                 throw new RuntimeException("Giá trị hạng mục tài trợ không được để trống");
             }
             
-            FundingItemEntity fundingItemEntity = null;
-            String itemName = item.getFundingItem().getName();
-            
-            for (FundingItemEntity fi : fundingItemRepository.findAll()) {
-                if (fi.getName().equals(itemName)) {
-                    fundingItemEntity = fi;
-                    break;
-                }
-            }
-            
-            if (fundingItemEntity == null) {
-                throw new RuntimeException("Không tìm thấy hạng mục tài trợ: " + itemName);
-            }
+            Long itemId = item.getFundingItem().getId();
+            FundingItemEntity fundingItemEntity = fundingItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hạng mục tài trợ với ID: " + itemId));
             
             ContractFundingItemEntity contractFundingItem = new ContractFundingItemEntity();
             contractFundingItem.setFundingItem(fundingItemEntity);
@@ -127,6 +117,7 @@ public class ContractServiceImpl implements ContractService {
                 ContractFundingItem itemModel = new ContractFundingItem();
                 
                 FundingItem fundingItemModel = new FundingItem();
+                fundingItemModel.setId(item.getFundingItem().getId());
                 fundingItemModel.setName(item.getFundingItem().getName());
                 itemModel.setFundingItem(fundingItemModel);
                 
