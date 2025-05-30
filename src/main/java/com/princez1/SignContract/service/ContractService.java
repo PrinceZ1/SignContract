@@ -1,10 +1,10 @@
 package com.princez1.SignContract.service;
 
-import com.princez1.SignContract.model.Contract;
+import com.princez1.SignContract.entity.ContractEntity;
 import java.util.List;
 
 public interface ContractService {
-    Contract createContract(Contract contract);
-    List<Contract> getAllContracts();
-    Contract getContractById(Long id);
+    ContractEntity createContract(ContractEntity contractEntity);
+    List<ContractEntity> getAllContracts();
+    ContractEntity getContractById(Long id);
 }

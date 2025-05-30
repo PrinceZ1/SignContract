@@ -1,16 +1,10 @@
 package com.princez1.SignContract.service.impl;
 
 import com.princez1.SignContract.entity.ContractEntity;
-import com.princez1.SignContract.entity.ContractFundingItemEntity;
 import com.princez1.SignContract.entity.FundingItemEntity;
 import com.princez1.SignContract.entity.SponsorEntity;
 import com.princez1.SignContract.entity.UserEntity;
 import com.princez1.SignContract.enums.ContractStatus;
-import com.princez1.SignContract.model.Contract;
-import com.princez1.SignContract.model.ContractFundingItem;
-import com.princez1.SignContract.model.FundingItem;
-import com.princez1.SignContract.model.Sponsor;
-import com.princez1.SignContract.model.User;
 import com.princez1.SignContract.repository.ContractRepository;
 import com.princez1.SignContract.repository.SponsorRepository;
 import com.princez1.SignContract.repository.FundingItemRepository;
@@ -21,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ContractServiceImpl implements ContractService {
@@ -42,114 +34,43 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public Contract createContract(Contract contract) {
-        contract.calculateTotalAmount();
-
-        ContractEntity contractEntity = new ContractEntity();
-        contractEntity.setType(contract.getType());
-        contractEntity.setStartDate(contract.getStartDate());
-        contractEntity.setEndDate(contract.getEndDate());
-        contractEntity.setTerms(contract.getTerms());
-        contractEntity.setAmount(contract.getTotalAmount());
+    public ContractEntity createContract(ContractEntity contractEntity) {
         contractEntity.setStatus(ContractStatus.SIGNED);
         contractEntity.setCreatedAt(LocalDateTime.now());
 
-        SponsorEntity sponsorEntity = new SponsorEntity();
-        sponsorEntity.setName(contract.getSponsor().getName());
-        sponsorEntity.setContact(contract.getSponsor().getContact());
-        sponsorEntity.setPhone(contract.getSponsor().getPhone());
-        sponsorEntity.setEmail(contract.getSponsor().getEmail());
-        sponsorEntity.setAddress(contract.getSponsor().getAddress());
-        sponsorEntity.setActive(true);
-        contractEntity.setSponsor(sponsorEntity);
-
-        UserEntity signer = userRepository.findById(contract.getSignedBy().getId())
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy người ký"));
-        contractEntity.setSignedBy(signer);
-
-        List<ContractFundingItemEntity> fundingItems = new ArrayList<>();
-        
-        for (ContractFundingItem item : contract.getFundingItems()) {
-            if (item.getValue() == null) {
-                throw new RuntimeException("Giá trị hạng mục tài trợ không được để trống");
-            }
-            
-            Long itemId = item.getFundingItem().getId();
-            FundingItemEntity fundingItemEntity = fundingItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hạng mục tài trợ với ID: " + itemId));
-            
-            ContractFundingItemEntity contractFundingItem = new ContractFundingItemEntity();
-            contractFundingItem.setFundingItem(fundingItemEntity);
-            contractFundingItem.setValue(item.getValue());
-            contractFundingItem.setContract(contractEntity);
-            
-            fundingItems.add(contractFundingItem);
+        if (contractEntity.getSponsor() != null && contractEntity.getSponsor().getId() != null) {
+            SponsorEntity sponsor = sponsorRepository.findById(contractEntity.getSponsor().getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sponsor"));
+            contractEntity.setSponsor(sponsor);
         }
-        
-        contractEntity.setContractFundingItems(fundingItems);
 
-        ContractEntity savedContract = contractRepository.save(contractEntity);
-        return convertToModel(savedContract);
+        if (contractEntity.getSignedBy() != null && contractEntity.getSignedBy().getId() != null) {
+            UserEntity user = userRepository.findById(contractEntity.getSignedBy().getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người ký"));
+            contractEntity.setSignedBy(user);
+        }
+
+        java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
+        if (contractEntity.getContractFundingItems() != null) {
+            for (var item : contractEntity.getContractFundingItems()) {
+                if (item.getValue() != null) {
+                    totalAmount = totalAmount.add(item.getValue());
+                }
+            }
+        }
+        contractEntity.setAmount(totalAmount);
+
+        return contractRepository.save(contractEntity);
     }
 
     @Override
-    public List<Contract> getAllContracts() {
-        List<ContractEntity> contracts = contractRepository.findAll();
-        return contracts.stream()
-            .map(this::convertToModel)
-            .collect(Collectors.toList());
+    public List<ContractEntity> getAllContracts() {
+        return contractRepository.findAll();
     }
 
     @Override
-    public Contract getContractById(Long id) {
-        ContractEntity contract = contractRepository.findById(id)
+    public ContractEntity getContractById(Long id) {
+        return contractRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Contract not found"));
-        return convertToModel(contract);
-    }
-
-    private Contract convertToModel(ContractEntity contractEntity) {
-        Contract model = new Contract();
-        model.setId(contractEntity.getId());
-        
-        Sponsor sponsorModel = new Sponsor();
-        sponsorModel.setName(contractEntity.getSponsor().getName());
-        sponsorModel.setContact(contractEntity.getSponsor().getContact());
-        sponsorModel.setPhone(contractEntity.getSponsor().getPhone());
-        sponsorModel.setEmail(contractEntity.getSponsor().getEmail());
-        sponsorModel.setAddress(contractEntity.getSponsor().getAddress());
-        model.setSponsor(sponsorModel);
-
-        User signerModel = new User();
-        signerModel.setId(contractEntity.getSignedBy().getId());
-        signerModel.setName(contractEntity.getSignedBy().getName());
-        signerModel.setEmail(contractEntity.getSignedBy().getEmail());
-        signerModel.setPhoneNumber(contractEntity.getSignedBy().getPhoneNumber());
-        signerModel.setPosition(contractEntity.getSignedBy().getPosition());
-        model.setSignedBy(signerModel);
-
-        model.setType(contractEntity.getType());
-        model.setTotalAmount(contractEntity.getAmount());
-        model.setStartDate(contractEntity.getStartDate());
-        model.setEndDate(contractEntity.getEndDate());
-        model.setTerms(contractEntity.getTerms());
-        model.setStatus(contractEntity.getStatus());
-        model.setCreatedAt(contractEntity.getCreatedAt());
-
-        List<ContractFundingItem> fundingItemModels = contractEntity.getContractFundingItems().stream()
-            .map(item -> {
-                ContractFundingItem itemModel = new ContractFundingItem();
-                
-                FundingItem fundingItemModel = new FundingItem();
-                fundingItemModel.setId(item.getFundingItem().getId());
-                fundingItemModel.setName(item.getFundingItem().getName());
-                itemModel.setFundingItem(fundingItemModel);
-                
-                itemModel.setValue(item.getValue());
-                return itemModel;
-            })
-            .collect(Collectors.toList());
-        model.setFundingItems(fundingItemModels);
-
-        return model;
     }
 }

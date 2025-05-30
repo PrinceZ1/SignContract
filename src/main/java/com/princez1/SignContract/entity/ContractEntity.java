@@ -21,7 +21,7 @@ public class ContractEntity {
     private Long id;
 
     @NotNull
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "sponsor_id")
     private SponsorEntity sponsor;
 

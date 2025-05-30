@@ -2,6 +2,7 @@ package com.princez1.SignContract.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "signedBy")
     private List<ContractEntity> contracts;
 } 

@@ -525,7 +525,7 @@
                     email: selectedSponsor.email,
                     address: selectedSponsor.address
                 },
-                fundingItems: selectedItems,
+                contractFundingItems: selectedItems,
                 signedBy: { id: currentUser.id }
             };
 
@@ -627,8 +627,8 @@
                         <div>
                             <strong>Hạng mục tài trợ:</strong>
                             <ul class="list-group mt-2">
-                                ${(contract.fundingItems && contract.fundingItems.length > 0)
-                                    ? contract.fundingItems.map(item => `<li class='list-group-item d-flex justify-content-between align-items-center'>${item.fundingItem.name}<span class='badge bg-primary rounded-pill'>${Number(item.value).toLocaleString('vi-VN')} VND</span></li>`).join('')
+                                ${(contract.contractFundingItems && contract.contractFundingItems.length > 0)
+                                    ? contract.contractFundingItems.map(item => `<li class='list-group-item d-flex justify-content-between align-items-center'>${item.fundingItem.name}<span class='badge bg-primary rounded-pill'>${Number(item.value).toLocaleString('vi-VN')} VND</span></li>`).join('')
                                     : '<li class="list-group-item">Không có hạng mục</li>'}
                             </ul>
                         </div>

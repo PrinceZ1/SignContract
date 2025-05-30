@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý hợp đồng</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div class="container mt-4">
+    <ul class="nav nav-tabs" id="contractTabs">
+        <li class="nav-item">
+            <a class="nav-link" href="#create" data-bs-toggle="tab">Ký hợp đồng</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="#list" data-bs-toggle="tab">Danh sách hợp đồng</a>
+        </li>
+    </ul>
+    <div class="tab-content mt-3">
+        <div class="tab-pane fade" id="create">
+            <!-- Form tạo hợp đồng sẽ thêm sau nếu cần -->
+        </div>
+        <div class="tab-pane fade show active" id="list">
+            <h2>Danh sách hợp đồng đã ký</h2>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Nhà tài trợ</th>
+                    <th>Loại hợp đồng</th>
+                    <th>Tổng giá trị</th>
+                    <th>Ngày bắt đầu</th>
+                    <th>Ngày kết thúc</th>
+                    <th>Trạng thái</th>
+                    <th>Chi tiết</th>
+                </tr>
+                </thead>
+                <tbody id="contract-list">
+                <!-- Dữ liệu sẽ được render bằng JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chi tiết hợp đồng -->
+<div class="modal fade" id="contractDetailModal" tabindex="-1" aria-labelledby="contractDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contractDetailModalLabel">Chi tiết hợp đồng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="contract-detail-error" class="alert alert-danger d-none">Lỗi khi tải chi tiết hợp đồng.</div>
+                <div id="contract-detail-content" class="d-none">
+                    <p><b>Nhà tài trợ:</b> <span id="detail-sponsor"></span></p>
+                    <p><b>Loại hợp đồng:</b> <span id="detail-type"></span></p>
+                    <p><b>Tổng giá trị:</b> <span id="detail-amount"></span></p>
+                    <p><b>Ngày bắt đầu:</b> <span id="detail-startDate"></span></p>
+                    <p><b>Ngày kết thúc:</b> <span id="detail-endDate"></span></p>
+                    <p><b>Trạng thái:</b> <span id="detail-status"></span></p>
+                    <p><b>Người ký:</b> <span id="detail-signedBy"></span></p>
+                    <p><b>Khoản tài trợ:</b></p>
+                    <ul id="detail-fundingItems"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Lấy danh sách hợp đồng
+fetch('/api/contracts')
+    .then(res => res.json())
+    .then(contracts => {
+        const tbody = document.getElementById('contract-list');
+        tbody.innerHTML = '';
+        contracts.forEach(contract => {
+            const row = `<tr>
+                <td>${contract.sponsor ? contract.sponsor.name : ''}</td>
+                <td>${contract.type || ''}</td>
+                <td>${contract.amount ? contract.amount.toLocaleString() + ' VND' : '0 VND'}</td>
+                <td>${contract.startDate || ''}</td>
+                <td>${contract.endDate || ''}</td>
+                <td>${contract.status || ''}</td>
+                <td><button class="btn btn-outline-primary btn-sm" onclick="showContractDetail(${contract.id})">Xem</button></td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    });
+
+window.showContractDetail = function(id) {
+    document.getElementById('contract-detail-error').classList.add('d-none');
+    document.getElementById('contract-detail-content').classList.add('d-none');
+    fetch(`/api/contracts/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Lỗi');
+            return res.json();
+        })
+        .then(contract => {
+            document.getElementById('detail-sponsor').innerText = contract.sponsor ? contract.sponsor.name : '';
+            document.getElementById('detail-type').innerText = contract.type || '';
+            document.getElementById('detail-amount').innerText = contract.amount ? contract.amount.toLocaleString() + ' VND' : '';
+            document.getElementById('detail-startDate').innerText = contract.startDate || '';
+            document.getElementById('detail-endDate').innerText = contract.endDate || '';
+            document.getElementById('detail-status').innerText = contract.status || '';
+            document.getElementById('detail-signedBy').innerText = contract.signedBy ? contract.signedBy.fullName || contract.signedBy.username : '';
+            // Funding items
+            const ul = document.getElementById('detail-fundingItems');
+            ul.innerHTML = '';
+            if (contract.contractFundingItems && contract.contractFundingItems.length > 0) {
+                contract.contractFundingItems.forEach(item => {
+                    ul.innerHTML += `<li>${item.name}: ${item.value ? item.value.toLocaleString() + ' VND' : ''}</li>`;
+                });
+            } else {
+                ul.innerHTML = '<li>Không có</li>';
+            }
+            document.getElementById('contract-detail-content').classList.remove('d-none');
+        })
+        .catch(() => {
+            document.getElementById('contract-detail-error').classList.remove('d-none');
+        });
+    const modal = new bootstrap.Modal(document.getElementById('contractDetailModal'));
+    modal.show();
+}
+</script>
+</body>
+</html> 

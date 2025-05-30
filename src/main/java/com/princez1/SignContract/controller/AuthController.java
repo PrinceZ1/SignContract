@@ -21,7 +21,6 @@ public class AuthController {
         String password = loginData.get("password");
         UserEntity user = userRepository.findByEmail(email);
         if (user != null && user.getPassword().equals(password)) {
-            // Không trả về password cho frontend
             user.setPassword(null);
             return ResponseEntity.ok(user);
         }
