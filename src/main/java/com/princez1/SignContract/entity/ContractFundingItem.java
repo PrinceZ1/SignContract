@@ -1,7 +1,6 @@
 package com.princez1.SignContract.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,7 +9,7 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "contract_funding_items")
-public class ContractFundingItemEntity {
+public class ContractFundingItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,11 +17,11 @@ public class ContractFundingItemEntity {
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "contract_id")
-    private ContractEntity contract;
+    private Contract contract;
 
     @ManyToOne
     @JoinColumn(name = "funding_item_id")
-    private FundingItemEntity fundingItem;
+    private FundingItem fundingItem;
 
     @Column(nullable = false)
     private BigDecimal value;

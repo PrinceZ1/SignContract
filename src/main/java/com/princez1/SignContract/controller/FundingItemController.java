@@ -1,6 +1,6 @@
 package com.princez1.SignContract.controller;
 
-import com.princez1.SignContract.entity.FundingItemEntity;
+import com.princez1.SignContract.entity.FundingItem;
 import com.princez1.SignContract.service.FundingItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +18,8 @@ public class FundingItemController {
     private FundingItemService fundingItemService;
 
     @GetMapping
-    public ResponseEntity<List<FundingItemEntity>> getFundingItems() {
-        List<FundingItemEntity> items = fundingItemService.getAllFundingItems();
+    public ResponseEntity<List<FundingItem>> getFundingItems() {
+        List<FundingItem> items = fundingItemService.getAllFundingItems();
         return ResponseEntity.ok(items);
     }
 } 

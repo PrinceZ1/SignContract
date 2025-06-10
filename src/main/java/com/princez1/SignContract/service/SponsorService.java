@@ -1,13 +1,13 @@
 package com.princez1.SignContract.service;
 
-import com.princez1.SignContract.entity.SponsorEntity;
+import com.princez1.SignContract.entity.Sponsor;
 import java.util.List;
 
 public interface SponsorService {
-    List<SponsorEntity> getAllSponsors();
-    List<SponsorEntity> getActiveSponsors();
-    SponsorEntity createSponsor(SponsorEntity sponsor);
-    SponsorEntity getSponsorById(Long id);
-    SponsorEntity updateSponsor(Long id, SponsorEntity sponsor);
-    SponsorEntity changeStatus(Long id, boolean active);
+    List<Sponsor> getAllSponsors();
+    List<Sponsor> getActiveSponsors();
+    Sponsor createSponsor(Sponsor sponsor);
+    Sponsor getSponsorById(Long id);
+    Sponsor updateSponsor(Long id, Sponsor sponsor);
+    Sponsor changeStatus(Long id, boolean active);
 } 

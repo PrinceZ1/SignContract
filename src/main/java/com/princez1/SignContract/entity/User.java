@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "users")
-public class UserEntity {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,5 +31,5 @@ public class UserEntity {
 
     @JsonIgnore
     @OneToMany(mappedBy = "signedBy")
-    private List<ContractEntity> contracts;
+    private List<Contract> contracts;
 } 

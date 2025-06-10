@@ -16,7 +16,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "contracts")
-public class ContractEntity {
+public class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,12 +24,12 @@ public class ContractEntity {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "sponsor_id")
-    private SponsorEntity sponsor;
+    private Sponsor sponsor;
 
     @NotNull
     @ManyToOne
     @JoinColumn(name = "signed_by")
-    private UserEntity signedBy;
+    private User signedBy;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -37,7 +37,7 @@ public class ContractEntity {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContractFundingItemEntity> contractFundingItems;
+    private List<ContractFundingItem> contractFundingItems;
 
     @NotNull
     @Positive

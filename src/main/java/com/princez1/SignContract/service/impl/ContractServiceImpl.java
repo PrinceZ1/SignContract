@@ -1,9 +1,9 @@
 package com.princez1.SignContract.service.impl;
 
-import com.princez1.SignContract.entity.ContractEntity;
-import com.princez1.SignContract.entity.FundingItemEntity;
-import com.princez1.SignContract.entity.SponsorEntity;
-import com.princez1.SignContract.entity.UserEntity;
+import com.princez1.SignContract.entity.Contract;
+import com.princez1.SignContract.entity.FundingItem;
+import com.princez1.SignContract.entity.Sponsor;
+import com.princez1.SignContract.entity.User;
 import com.princez1.SignContract.enums.ContractStatus;
 import com.princez1.SignContract.repository.ContractRepository;
 import com.princez1.SignContract.repository.SponsorRepository;
@@ -34,48 +34,48 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public ContractEntity createContract(ContractEntity contractEntity) {
-        contractEntity.setStatus(ContractStatus.SIGNED);
-        contractEntity.setCreatedAt(LocalDateTime.now());
+    public Contract createContract(Contract contract) {
+        contract.setStatus(ContractStatus.SIGNED);
+        contract.setCreatedAt(LocalDateTime.now());
 
-        if (contractEntity.getSponsor() != null && contractEntity.getSponsor().getId() != null) {
-            SponsorEntity sponsor = sponsorRepository.findById(contractEntity.getSponsor().getId())
+        if (contract.getSponsor() != null && contract.getSponsor().getId() != null) {
+            Sponsor sponsor = sponsorRepository.findById(contract.getSponsor().getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sponsor"));
-            contractEntity.setSponsor(sponsor);
+            contract.setSponsor(sponsor);
         }
 
-        if (contractEntity.getSignedBy() != null && contractEntity.getSignedBy().getId() != null) {
-            UserEntity user = userRepository.findById(contractEntity.getSignedBy().getId())
+        if (contract.getSignedBy() != null && contract.getSignedBy().getId() != null) {
+            User user = userRepository.findById(contract.getSignedBy().getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người ký"));
-            contractEntity.setSignedBy(user);
+            contract.setSignedBy(user);
         }
 
         java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
-        if (contractEntity.getContractFundingItems() != null) {
-            for (var item : contractEntity.getContractFundingItems()) {
+        if (contract.getContractFundingItems() != null) {
+            for (var item : contract.getContractFundingItems()) {
                 if (item.getFundingItem() != null && item.getFundingItem().getId() != null) {
-                    FundingItemEntity fundingItem = fundingItemRepository.findById(item.getFundingItem().getId())
+                    FundingItem fundingItem = fundingItemRepository.findById(item.getFundingItem().getId())
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy hạng mục tài trợ"));
                     item.setFundingItem(fundingItem);
                 }
                 if (item.getValue() != null) {
                     totalAmount = totalAmount.add(item.getValue());
                 }
-                item.setContract(contractEntity);
+                item.setContract(contract);
             }
         }
-        contractEntity.setAmount(totalAmount);
+        contract.setAmount(totalAmount);
 
-        return contractRepository.save(contractEntity);
+        return contractRepository.save(contract);
     }
 
     @Override
-    public List<ContractEntity> getAllContracts() {
+    public List<Contract> getAllContracts() {
         return contractRepository.findAll();
     }
 
     @Override
-    public ContractEntity getContractById(Long id) {
+    public Contract getContractById(Long id) {
         return contractRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Contract not found"));
     }

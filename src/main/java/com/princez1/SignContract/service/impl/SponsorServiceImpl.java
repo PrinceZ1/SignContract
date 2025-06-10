@@ -1,6 +1,6 @@
 package com.princez1.SignContract.service.impl;
 
-import com.princez1.SignContract.entity.SponsorEntity;
+import com.princez1.SignContract.entity.Sponsor;
 import com.princez1.SignContract.repository.SponsorRepository;
 import com.princez1.SignContract.service.SponsorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,31 +18,31 @@ public class SponsorServiceImpl implements SponsorService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     @Override
-    public List<SponsorEntity> getAllSponsors() {
+    public List<Sponsor> getAllSponsors() {
         return sponsorRepository.findAll();
     }
 
     @Override
-    public List<SponsorEntity> getActiveSponsors() {
+    public List<Sponsor> getActiveSponsors() {
         return sponsorRepository.findByActiveTrue();
     }
 
     @Override
-    public SponsorEntity createSponsor(SponsorEntity sponsor) {
+    public Sponsor createSponsor(Sponsor sponsor) {
         validateSponsor(sponsor);
         sponsor.setActive(true);
         return sponsorRepository.save(sponsor);
     }
 
     @Override
-    public SponsorEntity getSponsorById(Long id) {
+    public Sponsor getSponsorById(Long id) {
         return sponsorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sponsor not found with id: " + id));
     }
 
     @Override
-    public SponsorEntity updateSponsor(Long id, SponsorEntity sponsor) {
-        SponsorEntity existingSponsor = sponsorRepository.findById(id)
+    public Sponsor updateSponsor(Long id, Sponsor sponsor) {
+        Sponsor existingSponsor = sponsorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sponsor not found with id: " + id));
 
         existingSponsor.setName(sponsor.getName());
@@ -56,14 +56,14 @@ public class SponsorServiceImpl implements SponsorService {
     }
 
     @Override
-    public SponsorEntity changeStatus(Long id, boolean active) {
-        SponsorEntity sponsor = sponsorRepository.findById(id)
+    public Sponsor changeStatus(Long id, boolean active) {
+        Sponsor sponsor = sponsorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sponsor not found with id: " + id));
         sponsor.setActive(active);
         return sponsorRepository.save(sponsor);
     }
 
-    private void validateSponsor(SponsorEntity sponsor) {
+    private void validateSponsor(Sponsor sponsor) {
         if (!StringUtils.hasText(sponsor.getName())) {
             throw new IllegalArgumentException("Tên nhà tài trợ không được rỗng");
         }
