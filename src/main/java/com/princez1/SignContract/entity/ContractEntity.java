@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,6 +35,7 @@ public class ContractEntity {
     @Enumerated(EnumType.STRING)
     private ContractType type;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContractFundingItemEntity> contractFundingItems;
 

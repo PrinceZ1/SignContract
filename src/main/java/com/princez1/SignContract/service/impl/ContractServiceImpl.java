@@ -53,9 +53,15 @@ public class ContractServiceImpl implements ContractService {
         java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
         if (contractEntity.getContractFundingItems() != null) {
             for (var item : contractEntity.getContractFundingItems()) {
+                if (item.getFundingItem() != null && item.getFundingItem().getId() != null) {
+                    FundingItemEntity fundingItem = fundingItemRepository.findById(item.getFundingItem().getId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy hạng mục tài trợ"));
+                    item.setFundingItem(fundingItem);
+                }
                 if (item.getValue() != null) {
                     totalAmount = totalAmount.add(item.getValue());
                 }
+                item.setContract(contractEntity);
             }
         }
         contractEntity.setAmount(totalAmount);

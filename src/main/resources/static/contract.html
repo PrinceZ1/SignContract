@@ -492,16 +492,21 @@
             const selectedItems = Array.from(document.querySelectorAll('.funding-item-checkbox:checked'))
                 .map(checkbox => {
                     const valueInput = document.querySelector(`.funding-item-value[data-item-id="${checkbox.value}"]`);
+                    let value = valueInput.value.trim();
+                    // If value is empty or not a valid number, treat as NaN
+                    if (value === '' || isNaN(value)) value = null;
+                    else value = parseFloat(value);
                     return {
                         fundingItem: {
                             id: parseInt(checkbox.value)
                         },
-                        value: parseFloat(valueInput.value)
+                        value: value
                     };
                 });
 
-            if (selectedItems.length === 0) {
-                showMessage('Vui lòng chọn ít nhất một hạng mục tài trợ', 'error');
+            // Prevent submit if any selected item has invalid value
+            if (selectedItems.some(item => item.value === null || item.value <= 0)) {
+                showMessage('Vui lòng nhập giá trị hợp lệ cho tất cả hạng mục tài trợ đã chọn', 'error');
                 return;
             }
 
@@ -570,7 +575,7 @@
                     tr.innerHTML = `
                         <td>${contract.sponsor?.name || ''}</td>
                         <td>${contract.type || ''}</td>
-                        <td>${Number(contract.totalAmount || 0).toLocaleString('vi-VN')} VND</td>
+                        <td>${Number(contract.amount || 0).toLocaleString('vi-VN')} VND</td>
                         <td>${contract.startDate ? new Date(contract.startDate).toLocaleDateString('vi-VN') : ''}</td>
                         <td>${contract.endDate ? new Date(contract.endDate).toLocaleDateString('vi-VN') : ''}</td>
                         <td><span class="badge bg-success">${contract.status || ''}</span></td>
@@ -595,6 +600,8 @@
             try {
                 const response = await fetch(`/api/contracts/${contractId}`);
                 const contract = await response.json();
+                console.log('Contract data:', contract);
+                console.log('Contract funding items:', contract.contractFundingItems);
                 const body = document.getElementById('contractDetailBody');
                 if (!contract || !contract.sponsor) {
                     body.innerHTML = '<div class="alert alert-danger">Không thể tải chi tiết hợp đồng.</div>';
@@ -610,7 +617,7 @@
                             </div>
                             <div class="col-md-6">
                                 <strong>Loại hợp đồng:</strong> ${contract.type}<br>
-                                <strong>Tổng giá trị:</strong> ${Number(contract.totalAmount || 0).toLocaleString('vi-VN')} VND<br>
+                                <strong>Tổng giá trị:</strong> ${Number(contract.amount || 0).toLocaleString('vi-VN')} VND<br>
                                 <strong>Ngày bắt đầu:</strong> ${contract.startDate ? new Date(contract.startDate).toLocaleDateString('vi-VN') : ''}<br>
                                 <strong>Ngày kết thúc:</strong> ${contract.endDate ? new Date(contract.endDate).toLocaleDateString('vi-VN') : ''}<br>
                                 <strong>Trạng thái:</strong> <span class="badge bg-success">${contract.status || ''}</span><br>
